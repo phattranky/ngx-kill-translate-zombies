@@ -1,0 +1,11 @@
+{
+  "HELLO_WORLD": "Hello World",
+  "THIS_IS_THE_TRANSLATE_ZOMBIES_KILLER": "This is the Translate Zombies Killer",
+  "THIS_IS_PARENT_KEY": {
+    "I_AM_CHILD_KEY": "I am child key",
+    "I_AM_ZOMBIE_CHILD_KEY": "I am zombie child key",
+    "I_AM_SECOND_ZOMBIE_CHILD_KEY": "I am second zombie child key",
+    "NESTED_ZOMBIE": "I am nested zombie"
+  },
+  "I can remove all unuse translate keys": "I can remove all unuse translate keys"
+}

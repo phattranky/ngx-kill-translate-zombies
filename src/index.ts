@@ -1,61 +1,66 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+// tslint:disable
 export interface KillOption {
   translateFilePath: string;
   baseSrc: string;
   exportFreshTranslatePath?: string;
 }
 
-const ngxKillTranslateZombies = (option: KillOption): any => {
+const ngxKillTranslateZombies = async (option: KillOption): Promise<any> => {
+  console.log('Finding...')
+  return new Promise(async (resolve, reject) => {
+    try {
+      const text = fs.readFileSync(option.translateFilePath, 'utf8');
+      const json = JSON.parse(text);
+      const keys = getTranslationKeys(json, null, []);
 
-  try {
-    const text = fs.readFileSync(option.translateFilePath, 'utf8');
-    const json = JSON.parse(text);
-    const keys = getTranslationKeys(json, null, []);
+      try {
+        const allFiles = await walkThroughAllFiles(option.baseSrc);
+        const files = allFiles.filter(fn => fn.endsWith('.ts') || fn.endsWith('.html'));
 
-    walkThroughAllFiles(option.baseSrc, (err: any, allFiles: any[]) => {
-      if (err) {
-        throw `Error when walkThroughAllFiles ${err}`;
-      }
+        let zombies = [...keys];
+        for (let index = 0; index < files.length; index++) {
+          const file = files[index];
+          zombies = findInFile(file, zombies);
 
-      const files = allFiles.filter(fn => fn.endsWith('.ts') || fn.endsWith('.html'));
-
-      let zombies = [...keys];
-      for (let index = 0; index < files.length; index++) {
-        const file = files[index];
-        zombies = findInFile(file, zombies);
-
-        console.log(`Find Zombies at ${index}/${files.length}`);
-      }
-
-      let unzombified = { ...json };
-      for (let index = 0; index < zombies.length; index++) {
-        const zombie = zombies[index];
-        const zombieKeys = zombie.split('.');
-        const prop = zombieKeys.pop();
-        const parent = zombieKeys.reduce((obj, key) => obj ? obj[key] : {}, unzombified);
-
-        if (parent && prop && parent[prop]) {
-          delete parent[prop];
-          console.log(`Deleting key ${prop}`)
+          console.log(`Find Zombies at ${index}/${files.length}`);
         }
-      }
 
-      if (option.exportFreshTranslatePath) {
-        console.log(`Writing File at ${option.exportFreshTranslatePath}`)
-        const content = JSON.stringify(unzombified, null, 2);
-        fs.writeFile(option.exportFreshTranslatePath, content, 'utf8', () => {
-          console.log(`Fresh file created at ${option.exportFreshTranslatePath}. Successfully....`);
-        });
-      }
+        let unzombified = { ...json };
+        for (let index = 0; index < zombies.length; index++) {
+          const zombie = zombies[index];
+          const zombieKeys = zombie.split('.');
+          const prop = zombieKeys.pop();
+          const parent = zombieKeys.reduce((obj, key) => obj ? obj[key] : {}, unzombified);
 
-      return unzombified;
-    })
-  } catch (err) {
-    const errorMessage = 'Error while parsing the file: ' + err;
-    console.error(errorMessage, err);
-  }
+          if (parent && prop && parent[prop]) {
+            delete parent[prop];
+            console.log(`Deleting key ${prop}`)
+          }
+        }
+
+        if (option.exportFreshTranslatePath) {
+          console.log(`Writing File at ${option.exportFreshTranslatePath}`)
+          const content = JSON.stringify(unzombified, null, 2);
+          fs.writeFile(option.exportFreshTranslatePath, content, 'utf8', () => {
+            console.log(`Fresh file created at ${option.exportFreshTranslatePath}. Successfully....`);
+          });
+        }
+
+        resolve(unzombified);
+      } catch (err) {
+        const errorMessage = `Error when walkThroughAllFiles ${err}`
+        console.error(errorMessage, err);
+        reject(errorMessage);
+      }
+    } catch (err) {
+      const errorMessage = `Error while parsing the file: ${err}`;
+      console.error(errorMessage, err);
+      reject(errorMessage);
+    }
+  })
 }
 
 const findInFile = (filePath: string, keys: string[]) => {
@@ -92,28 +97,44 @@ const getTranslationKeys = (obj: any, cat: any, tKeys: string[]): string[] => {
   return currentKeys;
 }
 
-const walkThroughAllFiles = (dir: string, done: Function) => {
+const walkThroughAllFiles = async (dir: string): Promise<string[]> => {
   let results: string[] = [];
-  fs.readdir(dir, (err: any, list: string[]) => {
-    if (err) return done(err);
-    var pending = list.length;
-    if (!pending) return done(null, results);
-    list.forEach(function (file) {
-      file = path.resolve(dir, file);
-      fs.stat(file, function (err: any, stat: any) {
-        if (stat && stat.isDirectory()) {
-          walkThroughAllFiles(file, function (err: any, res: string) {
-            results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
+  
+  return new Promise((resolve, reject) => {
+    try {
+      const list = fs.readdirSync(dir);
+      let pending = list.length;
+
+      if (!pending) {
+        resolve(results);
+      }
+
+      list.forEach(async (file) => {
+        file = path.resolve(dir, file);
+
+         const stat = fs.statSync(file);
+
+         if (stat && stat.isDirectory()) {
+          const recursiveResults = await walkThroughAllFiles(file);
+          results = [...results, ...recursiveResults];
+
+          if (!--pending) {
+            resolve(results);
+          }
         } else {
           results.push(file);
-          if (!--pending) done(null, results);
+
+          if (!--pending) {
+            resolve(results);
+          }
         }
       });
-    });
-  });
+    } catch(err) {
+      reject(err)
+    }
+  })
 };
+// tslint:enable
 
 export { ngxKillTranslateZombies };
 export default ngxKillTranslateZombies;
