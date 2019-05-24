@@ -8,6 +8,19 @@ It's a port of https://marketplace.visualstudio.com/items?itemName=seveseves.ngx
 
 https://www.npmjs.com/package/ngx-kill-translate-zombies
 
+## Limitation
+- Cannot detect dynamic key like this example: https://github.com/seveves/ngx-translate-zombies/issues/2
+
+```
+<p class="error">{{'LOGIN.ERROR.' + (loginCode | async) | translate}}</p>
+```
+
+```
+getFilterName(filter: WalksheetFilter) {
+		const name = WalksheetFilterType[filter.type];
+		return this.translate.instant(`WALKSHEET.ACTIONBAR.FILTER.${name}`);
+	}
+```
 
 ## Run Example
 
