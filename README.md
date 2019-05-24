@@ -4,6 +4,11 @@ Finds unused translation keys in your Angular project. Should be used withe angu
 
 It's a port of https://marketplace.visualstudio.com/items?itemName=seveseves.ngx-translate-zombies and display the progress more detail.
 
+## NPM Package
+
+https://www.npmjs.com/package/ngx-kill-translate-zombies
+
+
 ## Run Example
 
 ```
