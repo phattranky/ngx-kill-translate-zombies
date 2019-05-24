@@ -5,7 +5,9 @@
     "I_AM_CHILD_KEY": "I am child key",
     "I_AM_ZOMBIE_CHILD_KEY": "I am zombie child key",
     "I_AM_SECOND_ZOMBIE_CHILD_KEY": "I am second zombie child key",
-    "NESTED_ZOMBIE": "I am nested zombie"
+    "NESTED_ZOMBIE": "I am nested zombie",
+    "I_AM_HUMAN": "I'm Human"
   },
-  "I can remove all unuse translate keys": "I can remove all unuse translate keys"
+  "I can remove all unuse translate keys": "I can remove all unuse translate keys",
+  "This is the key using by translate service in controller": "This is the key using by translate service in controller"
 }

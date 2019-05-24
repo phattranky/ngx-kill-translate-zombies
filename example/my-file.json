@@ -1,4 +1,7 @@
 {
   "HELLO_WORLD": "Hello World",
-  "THIS_IS_PARENT_KEY": {}
+  "THIS_IS_PARENT_KEY": {
+    "I_AM_HUMAN": "I'm Human"
+  },
+  "This is the key using by translate service in controller": "This is the key using by translate service in controller"
 }
