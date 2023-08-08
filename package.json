@@ -60,6 +60,7 @@
     "path": "^0.12.7",
     "standard-version": "^9.5.0",
     "trash-cli": "^5.0.0",
+    "typedoc": "^0.24.8",
     "typescript": "^5.1.6"
   },
   "old-devDependencies": {
